@@ -35,7 +35,9 @@ def count():
 ######################################################################
 @app.route("/picture", methods=["GET"])
 def get_pictures():
-    pass
+    resp = make_response(jsonify(data))
+    resp.headers['Content-Type'] = 'application/json'
+    return resp
 
 ######################################################################
 # GET A PICTURE
@@ -44,7 +46,10 @@ def get_pictures():
 
 @app.route("/picture/<int:id>", methods=["GET"])
 def get_picture_by_id(id):
-    pass
+    for picture in data:
+        if picture["id"] == id:
+            return picture
+    return {"message": "Resource not found"}, 404
 
 
 ######################################################################
@@ -52,7 +57,19 @@ def get_picture_by_id(id):
 ######################################################################
 @app.route("/picture", methods=["POST"])
 def create_picture():
-    pass
+    new_pictuare = request.json
+    if not new_pictuare:
+        return {"message": "Invalid input parameter"},
+    # code to validate new_pictuare ommited
+    try:
+        for item in data:
+            if item['id'] == new_pictuare['id']:
+                return jsonify(Message=f"picture with id {new_pictuare['id']} already present"), 302
+
+        data.append(new_pictuare)
+        return jsonify(id=new_pictuare['id'], pictuareInsert=new_pictuare), 201
+    except NameError:
+        return {"message": "data not defined"}, 500
 
 ######################################################################
 # UPDATE A PICTURE
@@ -61,11 +78,28 @@ def create_picture():
 
 @app.route("/picture/<int:id>", methods=["PUT"])
 def update_picture(id):
-    pass
+    new_pictuare = request.json
+    if not new_pictuare:
+        return {"message": "Invalid input parameter"},
+    # code to validate new_pictuare ommited
+    try:
+        for item in data:
+            if item['id'] == new_pictuare['id']:
+               data.remove(new_pictuare)
+               data.append(new_pictuare)
+               
+        state = new_pictuare['event_state'] 
+        return jsonify(id=new_pictuare['id'], event_state=state), 200
+    except NameError:
+        return {"message": "data not defined"}, 500
 
 ######################################################################
 # DELETE A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["DELETE"])
 def delete_picture(id):
-    pass
+    for picture in data:
+       if picture["id"] == id:
+           data.remove(picture)
+           return {"message":f"{id}"}, 204
+    return {"message": "picture not found"}, 404
